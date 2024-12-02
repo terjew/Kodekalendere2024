@@ -38,8 +38,8 @@ let calculateSimilarities (left, right) =
     let lookup = getOccurenceMap right 
     left |> Seq.map (fun l -> getSimilarityScore l lookup)
 
-let input = File.ReadLines("input.txt")
 let sample = File.ReadLines("sample.txt")
+let input = File.ReadLines("input.txt")
 
 input
 |> Seq.map parse

@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="SequenceHelper.fs" />
+    <Compile Include="Direction.fs" />
+    <Compile Include="Coordinate.fs" />
+    <Compile Include="MathHelpers.fs" />
+    <Compile Include="String.fs" />
+    <Compile Include="Regex.fs" />
+    <Compile Include="Matrix.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Collections.ParallelSeq" Version="1.2.0" />
+  </ItemGroup>
+
+</Project>
