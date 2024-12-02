@@ -32,9 +32,6 @@ let allWithinRange list =
 let isValid report =
     allSameSign report.Steps && allWithinRange report.Steps
 
-let outOfRangeCount list = 
-    list |> List.filter (fun f -> f > 0 && f <= 3) |> List.length
-    
 let isValidWithDampening report =
     let levelcount = report.Levels |> List.length
     let length = levelcount - 1
