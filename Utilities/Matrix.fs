@@ -46,6 +46,9 @@ module Matrix =
     let get matrix (x,y) =
         matrix.Data[y][x]
     
+    let getWithOverflow matrix (x,y) = 
+        get matrix ((x + matrix.SizeX) % matrix.SizeX, (y + matrix.SizeY) % matrix.SizeY)
+
     let row matrix y =
         matrix.Data[y]
 
