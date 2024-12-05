@@ -6,32 +6,27 @@ let checkPos pos matrix expected =
     | false -> false
     | true -> Matrix.get matrix pos |> (fun v -> v = expected)
 
-let checkDirectionXMAS pos matrix direction = 
+let checkDirection pos matrix direction expected = 
     let offset = Coordinate.offsetWith pos direction
     let check (pos, expected) = checkPos pos matrix expected
 
-    let isXmas = seq {(1,'M'); (2,'A'); (3,'S')}
-                |> Seq.map (fun (a,c) -> (offset a, c))
-                |> Seq.map check 
-                |> Seq.contains false 
-                |> not
+    let mismatch = expected
+                    |> Seq.map (fun (a,c) -> (offset a, c))
+                    |> Seq.map check 
+                    |> Seq.contains false 
 
-    if isXmas then 1 else 0
+    match mismatch with
+    | false -> 1
+    | true -> 0
+
+let checkDirectionXMAS pos matrix direction = 
+    seq {(1,'M'); (2,'A'); (3,'S')} |> checkDirection pos matrix direction
    
 let checkForXmas pos matrix =
     Direction.cardinalAndOrdinal |> Seq.sumBy (checkDirectionXMAS pos matrix)
 
 let checkDirectionMAS pos matrix direction = 
-    let offset = Coordinate.offsetWith pos direction
-    let check (pos, expected) = checkPos pos matrix expected
-
-    let isXmas = seq {(-1,'M'); (1,'S')}
-                |> Seq.map (fun (a,c) -> (offset a, c))
-                |> Seq.map check 
-                |> Seq.contains false 
-                |> not
-
-    if isXmas then 1 else 0
+    seq {(-1,'M'); (1,'S')} |> checkDirection pos matrix direction
    
 let checkForMas pos matrix =
     let count = Direction.ordinal 
