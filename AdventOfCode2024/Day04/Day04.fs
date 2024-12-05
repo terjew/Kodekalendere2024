@@ -7,11 +7,11 @@ let checkPos pos matrix expected =
     | true -> Matrix.get matrix pos |> (fun v -> v = expected)
 
 let checkDirection pos matrix direction expected = 
-    let offset = Coordinate.offsetWith pos direction
+    let calculatepos = Coordinate.offsetWith pos direction
     let check (pos, expected) = checkPos pos matrix expected
 
     let mismatch = expected
-                    |> Seq.map (fun (a,c) -> (offset a, c))
+                    |> Seq.map (fun (a,c) -> (calculatepos a, c))
                     |> Seq.map check 
                     |> Seq.contains false 
 
