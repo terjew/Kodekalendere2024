@@ -45,6 +45,11 @@ module Matrix =
 
     let get matrix (x,y) =
         matrix.Data[y][x]
+
+    let tryGet matrix pos =
+        match isInside matrix pos with
+        | true -> Some (get matrix pos)
+        | false -> None
     
     let getWithOverflow matrix (x,y) = 
         get matrix ((x + matrix.SizeX) % matrix.SizeX, (y + matrix.SizeY) % matrix.SizeY)
