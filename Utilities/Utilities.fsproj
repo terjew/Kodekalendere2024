@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="MathEvaluator.fs" />
     <Compile Include="SequenceHelper.fs" />
     <Compile Include="Direction.fs" />
     <Compile Include="Coordinate.fs" />
