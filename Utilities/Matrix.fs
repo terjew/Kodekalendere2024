@@ -188,6 +188,9 @@ module Matrix =
         let repeatedRows = seq{1..count} |> Seq.collect (fun _ -> repeatedCols)
         fromStrings repeatedRows
 
+    let maxDim matrix =
+        max matrix.SizeX matrix.SizeY
+
     //Printing
     let print matrix =
         printfn "Matrix[%d,%d]" matrix.SizeX matrix.SizeY

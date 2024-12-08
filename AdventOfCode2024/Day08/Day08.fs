@@ -34,6 +34,4 @@ let distinctAntinodes min max map =
 let map = File.ReadLines("input.txt") |> Matrix.fromStrings        
 
 map |> distinctAntinodes 1 1 |> Seq.length |> printfn "Part 1: %A"
-
-let max = Math.Max(map.SizeX,map.SizeY)
-map |> distinctAntinodes 0 max |> Seq.length |> printfn "Part 2: %A"
+map |> distinctAntinodes 0 (Matrix.maxDim map) |> Seq.length |> printfn "Part 2: %A"
