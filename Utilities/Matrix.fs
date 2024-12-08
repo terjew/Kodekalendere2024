@@ -6,6 +6,8 @@ type Matrix =
         SizeY : int
         Data : string[]
     }
+    override this.ToString (): string = 
+        String.concat "\n" this.Data
 
 module Matrix =
 
@@ -125,7 +127,7 @@ module Matrix =
     
     let neighborCoordsWithDirection matrix pos =
         Direction.cardinal 
-        |> Seq.map (Coordinate.neighbor pos)
+        |> Seq.map (Vector.neighbor pos)
         |> Map.ofSeq
         |> Map.filter (fun dir pos -> isInside matrix pos)
 

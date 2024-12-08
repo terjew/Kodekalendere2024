@@ -7,7 +7,7 @@ let checkPos pos matrix expected =
     | true -> Matrix.get matrix pos |> (fun v -> v = expected)
 
 let checkDirection pos matrix direction expected = 
-    let calculatepos = Coordinate.offsetWith pos direction
+    let calculatepos = Vector.offsetWith pos direction
     let check (pos, expected) = checkPos pos matrix expected
 
     let mismatch = expected

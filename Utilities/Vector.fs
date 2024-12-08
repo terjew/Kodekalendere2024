@@ -1,8 +1,14 @@
 ﻿namespace Utilities
 
-module Coordinate = 
+module Vector = 
     let add (x1,y1) (x2,y2) =
         (x1 + x2, y1 + y2)
+
+    let subtract (x1,y1) (x2,y2) =
+        (x1 - x2, y1 - y2)
+
+    let mul (x,y) amount =
+        (x * amount, y * amount)
 
     let neighbor pos dir =
         (dir, dir |> Direction.offset |> add pos)

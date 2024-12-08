@@ -12,8 +12,8 @@ let concat a b =
 
 let apply partResult operator operand =
     let func = match operator with
-                | "+" -> (+)
-                | "*" -> (*)
+                | "+" -> ( + )
+                | "*" -> ( * )
                 | "||" -> concat
                 | _ -> failwith "Unknown operator"
     func partResult operand

@@ -9,7 +9,7 @@
     <Compile Include="MathEvaluator.fs" />
     <Compile Include="SequenceHelper.fs" />
     <Compile Include="Direction.fs" />
-    <Compile Include="Coordinate.fs" />
+    <Compile Include="Vector.fs" />
     <Compile Include="MathHelpers.fs" />
     <Compile Include="String.fs" />
     <Compile Include="Regex.fs" />

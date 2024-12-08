@@ -44,7 +44,7 @@ let move state newPos =
     }
 
 let moveOrRotate state =
-    let newPos = Coordinate.offsetWith state.Position state.Heading 1
+    let newPos = Vector.offsetWith state.Position state.Heading 1
     match Matrix.tryGet state.Map newPos with
     | Some c when c = '#' -> rotate state |> Some
     | Some _ -> move state newPos |> Some
