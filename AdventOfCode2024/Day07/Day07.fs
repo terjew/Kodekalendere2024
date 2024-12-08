@@ -23,14 +23,17 @@ let isSolution (target, operands) operators =
     let result = Seq.fold2 apply head operators (Seq.tail operands)
     target = result
 
-let canBeSolved (target, operands)=
-    let operators = ["+";"*";"||"]
+let canBeSolved operators (target, operands) =
     let numOperators = (Seq.length operands) - 1
     let operatorVariants = SequenceHelper.getPermsWithRep numOperators operators
     operatorVariants |> Seq.exists (isSolution (target, operands))
 
-File.ReadLines("input.txt")
-|> Seq.map parseLine
-|> Seq.filter canBeSolved
-|> Seq.sumBy (fun (target,_) -> target)
-|> printfn "Part 1: %A"
+let sumSolvable operators equations =
+    equations 
+    |> Seq.filter (canBeSolved operators)
+    |> Seq.sumBy (fun (target,_) -> target)
+
+let equations = File.ReadLines("input.txt") |> Seq.map parseLine
+
+equations |> sumSolvable ["+";"*"] |> printfn "Part 1: %A"
+equations |> sumSolvable ["+";"*";"||"] |> printfn "Part 2: %A"
