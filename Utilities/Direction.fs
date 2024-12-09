@@ -6,6 +6,40 @@ module Direction =
     let ordinal = [|NorthEast ; SouthEast ; SouthWest ; NorthWest|]
     let cardinalAndOrdinal = [|North ; NorthEast ; East ; SouthEast ; South ; SouthWest ; West ; NorthWest|]
 
+    let cardinalSymbols = "╵╴╷╶"
+    let cardinalSymbolCombinations = "?╵╶└╷║┌╟╴┘═╧┐╢╤╬"
+
+
+    let toInt cardinalDirection =
+        match cardinalDirection with
+        | North -> 1
+        | East -> 2
+        | South -> 4
+        | West -> 8
+        | _ -> failwith "unexpected direction"
+
+    let char int =
+        cardinalSymbolCombinations[int]
+
+    let intValueFromChar (char:char) =
+        match cardinalSymbolCombinations.IndexOf char with
+        | -1 -> 0
+        | a -> a
+
+    let directionsFromInt int =
+        [
+            if (int &&& 1) = 1 then yield North
+            if (int &&& 2) = 2 then yield East
+            if (int &&& 4) = 4 then yield South
+            if (int &&& 8) = 8 then yield West
+        ]
+
+    let directionsFromChar char =
+        char |> intValueFromChar |> directionsFromInt
+
+    let directionsToChar directions = 
+        directions |> Seq.sumBy toInt |> char
+
     let oposite direction = 
         match direction with
         | North -> South
@@ -40,16 +74,16 @@ module Direction =
         | (-1,-1) -> NorthWest 
         | _ -> failwith "Unknown offset"
 
-    let symbol direction = 
-        //let symbols = @"|/-\|/-\"
-        let symbols = @"^/>\v/<\"
-        let index = cardinalAndOrdinal |> Array.findIndex ((=) direction)
-        symbols[index]
+    //let symbol direction = 
+    //    //let symbols = @"|/-\|/-\"
+    //    let symbols = @"^/>\v/<\"
+    //    let index = cardinalAndOrdinal |> Array.findIndex ((=) direction)
+    //    symbols[index]
 
-    let lineSymbol direction = 
-        let symbols = @"|/-\|/-\"
-        let index = cardinalAndOrdinal |> Array.findIndex ((=) direction)
-        symbols[index]
+    //let lineSymbol direction = 
+    //    let symbols = @"|/-\|/-\"
+    //    let index = cardinalAndOrdinal |> Array.findIndex ((=) direction)
+    //    symbols[index]
 
     let next direction steps = 
         let index = cardinalAndOrdinal |> Array.findIndex ((=) direction)

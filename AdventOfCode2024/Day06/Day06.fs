@@ -1,74 +1,103 @@
 ﻿open System.IO
 open Utilities
+open FSharp.Collections.ParallelSeq
 
 type State = 
     {
         Position : int * int
         Heading : Direction
         Map : Matrix
-        LineSymbol : char
-        Trail : ((int * int) * Direction) list
     }
+
+type SearchStatus =
+    | Running of State
+    | BoardExited of State
+    | LoopFound
+
+let northChar = Direction.directionsToChar [Direction.North]
 
 let createState pos heading map =
     {
         Position = pos;
         Heading = heading;
         Map = map;
-        LineSymbol = Direction.lineSymbol heading;
-        Trail = List.empty
     }
 
 let findStart matrix =
-    matrix |> Matrix.find '^'
+    matrix |> Matrix.find northChar
 
 let rotate state =
     let newHeading = Direction.next state.Heading 2
     { state with
         Heading = newHeading;
-        LineSymbol = (Direction.lineSymbol newHeading)
-        Map = state.Map |> Matrix.withValueAt state.Position (Direction.symbol newHeading)
     }    
 
 let move state newPos =
-    let oldSymbol = Matrix.get state.Map newPos
-    let newSymbol = match oldSymbol with
-                    | '|' -> '+'
-                    | '-' -> '+'
-                    | '^' -> '+'
-                    | _ -> state.LineSymbol
     { state with 
-        Map = state.Map |> Matrix.withValueAt newPos newSymbol
         Position = newPos
-        Trail = (state.Position, state.Heading) :: state.Trail
     }
+
+let writePosition state =
+    let cellHistory = Matrix.get state.Map state.Position |> Direction.directionsFromChar
+    match (cellHistory |> Seq.contains state.Heading) with
+    | true -> LoopFound
+    | false ->  let newCellValue = Direction.directionsToChar (state.Heading :: cellHistory)
+                let updatedMap = state.Map |> Matrix.withValueAt state.Position newCellValue
+                Running { state with 
+                            Map = updatedMap
+                        }
 
 let moveOrRotate state =
     let newPos = Vector.offsetWith state.Position state.Heading 1
     match Matrix.tryGet state.Map newPos with
-    | Some c when c = '#' -> rotate state |> Some
-    | Some _ -> move state newPos |> Some
-    | None -> None
+    | None -> BoardExited state
+    | Some c when "#O".Contains c -> rotate state |> writePosition
+    | Some _ -> move state newPos |> writePosition
 
 let rec solve state =
+    //printfn "%O" state.Map
     match moveOrRotate state with
-    | Some newState -> solve newState
-    | None -> state
+    | BoardExited finalState -> finalState
+    | LoopFound -> failwith "Unexpected error"
+    | Running newState -> solve newState
 
-let rec solveForLoops state count =
+let rec detectLoop state =
     match moveOrRotate state with
-    | Some newState -> solveForLoops newState count
-    | None -> state
+    | BoardExited _ -> false
+    | LoopFound -> true
+    | Running newState -> detectLoop newState
 
-let map = File.ReadLines("input.txt") |> Matrix.fromStrings        
+
+printfn "%s" Direction.cardinalSymbolCombinations
+printfn "%s" (Direction.directionsToChar [Direction.North; Direction.East] |> string)
+
+let map = 
+    File.ReadLines("input.txt")
+    |> Seq.map (fun str -> str.Replace('.',' '))
+    |> Seq.map (fun str -> str.Replace('^', northChar))
+    |> Matrix.fromStrings
+
 let start = findStart map
 let state = createState start Direction.North map
 
 let solved = state |> solve
 Matrix.print solved.Map
-solved.Trail |> List.distinctBy (fun (pos, dir) -> pos) |>  List.length |> printf "Trail: %A"
 
-solved.Map 
-|> Matrix.findAllOf "^v<>|-+" 
+let visitedCells = 
+    solved.Map 
+    |> Matrix.findAllOf Direction.cardinalSymbolCombinations 
+
+visitedCells
 |> Seq.length
-|> printf "Part 1: %A"
+|> printfn "Part 1: %A"
+
+let placeObstacle state pos =
+    { state with
+        Map = Matrix.withValueAt pos 'O' state.Map
+    }
+
+visitedCells
+|> Seq.map (placeObstacle state)
+|> PSeq.filter detectLoop
+|> Seq.length
+|> printfn "Part 2: %d"
