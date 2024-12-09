@@ -74,17 +74,6 @@ module Direction =
         | (-1,-1) -> NorthWest 
         | _ -> failwith "Unknown offset"
 
-    //let symbol direction = 
-    //    //let symbols = @"|/-\|/-\"
-    //    let symbols = @"^/>\v/<\"
-    //    let index = cardinalAndOrdinal |> Array.findIndex ((=) direction)
-    //    symbols[index]
-
-    //let lineSymbol direction = 
-    //    let symbols = @"|/-\|/-\"
-    //    let index = cardinalAndOrdinal |> Array.findIndex ((=) direction)
-    //    symbols[index]
-
     let next direction steps = 
         let index = cardinalAndOrdinal |> Array.findIndex ((=) direction)
         let next = (index + steps) % cardinalAndOrdinal.Length

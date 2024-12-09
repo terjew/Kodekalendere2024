@@ -67,9 +67,12 @@ let rec detectLoop state =
     | LoopFound -> true
     | Running newState -> detectLoop newState
 
+let placeObstacle state pos =
+    { state with
+        Map = Matrix.withValueAt pos 'O' state.Map
+    }
 
 printfn "%s" Direction.cardinalSymbolCombinations
-printfn "%s" (Direction.directionsToChar [Direction.North; Direction.East] |> string)
 
 let map = 
     File.ReadLines("input.txt")
@@ -79,22 +82,14 @@ let map =
 
 let start = findStart map
 let state = createState start Direction.North map
-
 let solved = state |> solve
-Matrix.print solved.Map
+let visitedCells = solved.Map |> Matrix.findAllOf Direction.cardinalSymbolCombinations 
 
-let visitedCells = 
-    solved.Map 
-    |> Matrix.findAllOf Direction.cardinalSymbolCombinations 
+Matrix.print solved.Map
 
 visitedCells
 |> Seq.length
 |> printfn "Part 1: %A"
-
-let placeObstacle state pos =
-    { state with
-        Map = Matrix.withValueAt pos 'O' state.Map
-    }
 
 visitedCells
 |> Seq.map (placeObstacle state)
