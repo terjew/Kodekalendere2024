@@ -129,12 +129,11 @@ module Matrix =
         Direction.cardinal 
         |> Seq.map (Vector.neighbor pos)
         |> Map.ofSeq
-        |> Map.filter (fun dir pos -> isInside matrix pos)
+        |> Map.filter (fun _ pos -> isInside matrix pos)
 
     let neighborsWithDirection matrix pos =
         neighborCoordsWithDirection matrix pos
-        |> Map.map (fun dir pos -> get matrix pos)
-
+        |> Map.map (fun _ pos -> get matrix pos)
 
     //Transforming
     let withValueAt (x,y) value matrix =
