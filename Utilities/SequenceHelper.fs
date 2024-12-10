@@ -1,7 +1,16 @@
 ﻿namespace Utilities
 
 module SequenceHelper = 
-    
+
+    let swapIndices i1 i2 (list:'T list) = 
+        let v1 = list.[i1]
+        let v2 = list.[i2]
+        let swapfunc i v =
+            if i = i1 then v2
+            elif i = i2 then v1
+            else v
+        list |> List.mapi swapfunc
+
     let rec pairs list = 
         seq {  
             match list with 
