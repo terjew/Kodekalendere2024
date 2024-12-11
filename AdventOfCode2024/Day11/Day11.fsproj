@@ -12,7 +12,7 @@
     <Content Include="sample.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Day10.fs" />
+    <Compile Include="Day11.fs" />
   </ItemGroup>
 
   <ItemGroup>

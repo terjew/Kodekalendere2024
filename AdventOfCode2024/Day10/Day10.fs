@@ -4,7 +4,7 @@ open Utilities
 let getTrailheads map =
     map |> Matrix.findAll '0'
 
-let rec reachablePeaks (map:Matrix) currentHeight trail pos =
+let rec reachablePeaks map currentHeight trail pos =
     let newTrail = pos :: trail
     match currentHeight with
     | '9' -> [pos]
@@ -16,16 +16,14 @@ let rec reachablePeaks (map:Matrix) currentHeight trail pos =
         let foo = continuations |> Seq.map (reachablePeaks map next newTrail) |> Seq.collect id
         foo |> List.ofSeq
 
-let scoreTrailhead map pos =
+let processTrailhead filter map pos  =
     pos 
     |> reachablePeaks map '0' []
-    |> Seq.distinct
+    |> filter
     |> Seq.length
 
-let rateTrailhead map pos =
-    pos 
-    |> reachablePeaks map '0' []
-    |> Seq.length
+let scoreTrailhead = processTrailhead Seq.distinct
+let rateTrailhead = processTrailhead id
 
 let map = File.ReadAllLines("input.txt") |> Matrix.fromStrings
 let trailheads = map |> getTrailheads

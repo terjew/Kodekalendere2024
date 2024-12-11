@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Function.fs" />
     <Compile Include="MathEvaluator.fs" />
     <Compile Include="SequenceHelper.fs" />
     <Compile Include="Direction.fs" />

@@ -1,5 +1,4 @@
 ﻿open System.IO
-open System
 open Utilities
 
 let getAntiNodes min max (a,b) =
