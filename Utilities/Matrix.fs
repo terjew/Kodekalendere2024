@@ -83,6 +83,11 @@ module Matrix =
                 for x in 0 .. matrix.SizeX - 1 do yield (x,y)
         }
 
+    let map f matrix =
+        allPos matrix
+        |> Seq.map (fun pos -> f matrix pos (get matrix pos))
+
+
     let find value matrix =
         matrix 
         |> allPos 
@@ -124,16 +129,20 @@ module Matrix =
         neighborCoordsDiagonal matrix pos
         |> Seq.map (get matrix)
 
-    
     let neighborCoordsWithDirection matrix pos =
         Direction.cardinal 
-        |> Seq.map (Vector.neighbor pos)
+        |> Seq.map (Vector.neighborWithDirection pos)
         |> Map.ofSeq
         |> Map.filter (fun _ pos -> isInside matrix pos)
 
     let neighborsWithDirection matrix pos =
         neighborCoordsWithDirection matrix pos
         |> Map.map (fun _ pos -> get matrix pos)
+
+    let neighborsWithValues matrix pos =
+        neighborCoordsWithDirection matrix pos
+        |> Seq.map (fun kvp -> (kvp.Value, get matrix kvp.Value))
+        |> Map.ofSeq
 
     //Transforming
     let withValueAt (x,y) value matrix =
@@ -145,7 +154,7 @@ module Matrix =
             Data = updatedArray
         }
 
-    let map func matrix =
+    let transformBy func matrix =
         let transformRow matrix y func =
             seq { 
                 for x in 0 .. matrix.SizeX - 1 do yield (func matrix (x,y) )
