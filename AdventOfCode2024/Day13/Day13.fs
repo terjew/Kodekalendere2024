@@ -41,7 +41,6 @@ let bestSolutionNaive machine =
     | [] -> None
     | list -> list |> Seq.minBy fst |> Some
 
-
 let toEquationSet machine =
     let vec3 = (machine.A, machine.B, machine.Prize)
     let offset = (0L,0L,10000000000000L)
@@ -49,21 +48,20 @@ let toEquationSet machine =
     let eq2 = vec3 |> Vector3.apply snd |> Vector3.apply int64 |> Vector3.add offset
     (eq1,eq2)
 
-let scoreL solution = 
+let inline score solution = 
     match solution with
-    | Some (a,b) -> a * 3L + b
-    | None -> 0L
+    | Some (a,b) -> a + a + a + b
+    | None -> LanguagePrimitives.GenericZero
 
 let machines = parseMachines "input.txt"
 
 machines
 |> Seq.map bestSolutionNaive
-|> Seq.map (Vector.tryApply int64)
-|> Seq.sumBy scoreL
+|> Seq.sumBy score
 |> printfn "Part 1: %A"
 
 machines
 |> Seq.map toEquationSet
 |> Seq.map MathHelpers.solveCrossMultiplication
-|> Seq.sumBy scoreL
+|> Seq.sumBy score
 |> printfn "Part 2: %A"
