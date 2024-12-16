@@ -32,3 +32,11 @@ module MathHelpers =
     
     let ordered v1 v2 =
         (min v1 v2, max v1 v2)
+
+    //solve sets of linear equations of the form ax + by = c
+    let inline solveCrossMultiplication ((a1,b1,c1), (a2,b2,c2)) = 
+        let x = (b2 * c1 - b1 * c2) / (b2 * a1 - b1 * a2)
+        let y = (c2 * a1 - c1 * a2) / (b2 * a1 - b1 * a2)
+        if a1 * x + b1 * y = c1 && a2 * x + b2 * y = c2
+        then Some (x,y)
+        else None

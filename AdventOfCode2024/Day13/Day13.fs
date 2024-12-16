@@ -36,26 +36,11 @@ let solutionsNaive machine =
                 if pos = machine.Prize then yield (a,b)
     ]
 
-
 let bestSolutionNaive machine = 
     match machine |> solutionsNaive with
     | [] -> None
     | list -> list |> Seq.minBy fst |> Some
 
-let score solution = 
-    match solution with
-    | Some (a,b) -> a * 3 + b
-    | None -> 0
-
-//solve sets of linear equations of the form ax + by = c
-let solveCrossMultiplication ((a1,b1,c1), (a2,b2,c2)) = 
-    let d1 = -c1
-    let d2 = -c2
-    let x = (b1 * d2 - b2 * d1) / (b2 * a1 - b1 * a2)
-    let y = (d1 * a2 - d2 * a1) / (b2 * a1 - b1 * a2)
-    if a1 * x + b1 * y = c1 && a2 * x + b2 * y = c2
-    then Some (x,y)
-    else None
 
 let toEquationSet machine =
     let vec3 = (machine.A, machine.B, machine.Prize)
@@ -73,11 +58,12 @@ let machines = parseMachines "input.txt"
 
 machines
 |> Seq.map bestSolutionNaive
-|> Seq.sumBy score
+|> Seq.map (Vector.tryApply int64)
+|> Seq.sumBy scoreL
 |> printfn "Part 1: %A"
 
 machines
 |> Seq.map toEquationSet
-|> Seq.map solveCrossMultiplication
+|> Seq.map MathHelpers.solveCrossMultiplication
 |> Seq.sumBy scoreL
 |> printfn "Part 2: %A"
