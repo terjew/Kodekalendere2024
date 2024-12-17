@@ -9,6 +9,23 @@ module Direction =
     let cardinalSymbols = "╵╴╷╶"
     let cardinalSymbolCombinations = "?╵╶└╷║┌╟╴┘═╧┐╢╤╬"
 
+    let degrees direction =
+        match direction with
+        | North -> 0
+        | NorthEast -> 45
+        | East -> 90
+        | SouthEast -> 135
+        | South -> 180
+        | SouthWest -> 225
+        | West -> 270
+        | NorthWest -> 315
+
+    let headingDiff h1 h2 = (h2 - h1 + 540) % 360 - 180;
+
+    let countRotationsBetween a b =
+        let h1 = degrees a
+        let h2 = degrees b
+        headingDiff h1 h2 |> abs |> (fun deg -> deg / 90)
 
     let toInt cardinalDirection =
         match cardinalDirection with
