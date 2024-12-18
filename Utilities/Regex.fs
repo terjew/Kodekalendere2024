@@ -29,6 +29,16 @@ module Value =
     let asFloat (union : ValueUnion) =
         getValue union |> float
 
+
+
+module ValueCollection =
+    let asIntVector2 collection =
+        Value.getElements collection 
+        |> Seq.map Value.getValue
+        |> Seq.map int
+        |> Seq.toList
+        |> (fun list -> (list[0], list[1]))
+
 module Regex =
 
     let isMatchPattern pattern input =
@@ -51,4 +61,10 @@ module Regex =
 
     let transformGroups pattern transform input =
         Regex.Match(input, pattern).Groups |> Value.GroupCollectionValue |> transformWith transform
+
+    let combineMatches pattern transform input =
+        Regex.Matches(input, pattern) |> Value.MatchCollectionValue |> transform
+
+    let combineGroups pattern transform input  =
+        Regex.Match(input, pattern).Groups |> Value.GroupCollectionValue |> transform
 

@@ -56,6 +56,7 @@ let rec scorePath pos heading path =
     | next :: tail -> 
         let offset = Vector.subtract next pos
         let direction = Direction.direction offset
+        let rotationCount = Direction.countRotationsBetween heading direction
         let rotationScore = match direction with 
                             | h when h = heading -> 0
                             | _ -> 1000
