@@ -9,7 +9,7 @@ let corrupt map pos =
     map |> Matrix.withValueAt pos '#'
 
 let solveAStar start goal map =
-    let f pos next = 
+    let h pos next = 
         (float (Vector.manhattanDistance pos next))
     let g _ _ = 
         1.0
@@ -19,7 +19,7 @@ let solveAStar start goal map =
         |> Seq.map (fun kvp -> kvp.Key)
 
     AStar.search start goal {
-        fCost = f
+        fCost = h
         gCost = g
         neighbours = neighbors
         maxIterations = None
@@ -35,18 +35,16 @@ let part1 size count filename =
     |> Seq.skip 1
     |> Seq.length 
 
-let allCorruptions initialMap (coords: (int*int) list) =
-    [|
-        for i in [0..coords.Length - 1] do
-            yield coords 
-            |> List.take i
-            |> Seq.fold corrupt initialMap
-    |]
-
-let isSolvable (map: Matrix) =
+let isSolvable map =
     match solveAStar (0,0) (map.SizeX - 1, map.SizeY - 1) map with
     | Some _ -> true
     | None -> false
+
+let isSolvableAfter map coords i =
+    coords 
+    |> List.take i
+    |> Seq.fold corrupt map
+    |> isSolvable
 
 let bisect isValidFunc (arr: 'a array) =
     let rec recurse lastValid firstInvalid =
@@ -65,13 +63,14 @@ let bisect isValidFunc (arr: 'a array) =
 
     recurse 0 (Array.length arr - 1)
 
-
 let part2 size filename = 
     let map = Matrix.create size size '.'
     let coords = parse filename |> Seq.toList
-    let corruptedMaps = allCorruptions map coords
-    let lastknown = bisect isSolvable corruptedMaps
-    coords[lastknown.Value]
+    let f = isSolvableAfter map coords
+    let lastKnown = bisect f [|0..coords.Length|]
+    coords[lastKnown.Value]
 
+let stopWatch = System.Diagnostics.Stopwatch.StartNew()
 part1 71 1024 "input.txt" |> printfn "Part 1: %A"
 part2 71 "input.txt" |> printfn "Part 2: %A"
+printfn "%f" stopWatch.Elapsed.TotalMilliseconds
