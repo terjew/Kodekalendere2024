@@ -32,6 +32,14 @@ module Vector =
         Direction.cardinal 
         |> Seq.map (neighborWithDirection pos)
 
+    let neighborsHorizontal pos =
+        [Direction.West; Direction.East]
+        |> Seq.map (neighbor pos)
+
+    let neighborsVertical pos =
+        [Direction.South; Direction.North]
+        |> Seq.map (neighbor pos)
+
     let manhattanDistance (x1,y1) (x2,y2) =
         abs (x2 - x1) + abs (y2 - y1)
 

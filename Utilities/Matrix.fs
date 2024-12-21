@@ -144,6 +144,9 @@ module Matrix =
         |> Seq.map (fun kvp -> (kvp.Value, get matrix kvp.Value))
         |> Map.ofSeq
 
+    let allWithinManhattanDistance matrix max pos=
+        matrix |> allPos |> Seq.filter (fun other -> max >= Vector.manhattanDistance pos other )
+
     //Transforming
     let withValueAt (x,y) value matrix =
         let updatedLine = matrix.Data[y] |> String.mapi(fun i char -> if i=x then value else char)
