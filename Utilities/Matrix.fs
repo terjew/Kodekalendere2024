@@ -1,4 +1,6 @@
 ﻿namespace Utilities
+open Pastel
+open System.IO
 
 type Matrix = 
     {
@@ -34,6 +36,10 @@ module Matrix =
     let fromStrings strings = 
         let data = Seq.toArray strings
         fromStringArray data
+
+    let fromFile filename =
+        File.ReadAllLines(filename)
+        |> fromStrings
 
     //Equality
     let equal matrix matrix2 = 
@@ -202,10 +208,50 @@ module Matrix =
     let maxDim matrix =
         max matrix.SizeX matrix.SizeY
 
+    //Traversing
+
+    let solveAStar start goal matrix =
+        let h pos next = 
+            (float (Vector.manhattanDistance pos next))
+        let g _ _ = 
+            1.0
+        let neighbors pos = 
+            neighborsWithValues matrix pos
+            |> Seq.filter (fun kvp -> '#' <> kvp.Value)
+            |> Seq.map (fun kvp -> kvp.Key)
+
+        AStar.search start goal {
+            fCost = h
+            gCost = g
+            neighbours = neighbors
+            maxIterations = None
+        }
+
     //Printing
+
+    let defaultColormap char =
+        let color = 
+            match char with 
+            |'#' -> System.Drawing.Color.DarkRed
+            |'.' -> System.Drawing.ColorTranslator.FromHtml("#222222")
+            | _  -> System.Drawing.Color.Cyan
+        (string char).Pastel(color)
+
     let print matrix =
         printfn "Matrix[%d,%d]" matrix.SizeX matrix.SizeY
         printfn "" 
         for y in 0 .. matrix.SizeY - 1 do
             printfn "%s" matrix.Data[y]
         printfn "" 
+
+    let draw char matrix pos =
+        matrix |> withValueAt pos char
+
+    let drawPath char matrix positions = 
+        positions |> Seq.fold (draw char) matrix 
+
+    let printColored colormap matrix =
+        matrix
+        |> rows 
+        |> Seq.map (String.printColor colormap)
+        |> Seq.toList
