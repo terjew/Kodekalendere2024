@@ -41,7 +41,7 @@ module ValueCollection =
 
 module Regex =
 
-    let isMatchPattern pattern input =
+    let isMatchPattern (pattern:string) (input:string) =
         Regex.IsMatch(input, pattern)
     
     let matchPattern pattern input =
@@ -55,6 +55,9 @@ module Regex =
 
     let transformWith transform collection =
         collection |> Value.getElements |> Seq.map transform
+
+    let transformMatch pattern transform input =
+        Regex.Match(input, pattern) |> Value.MatchValue |> transform
 
     let transformMatches pattern transform input =
         Regex.Matches(input, pattern) |> Value.MatchCollectionValue |> transformWith transform

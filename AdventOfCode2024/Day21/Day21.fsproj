@@ -12,10 +12,10 @@
     <Content Include="sample.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Day20.fs" />
+    <Compile Include="Day21.fs" />
   </ItemGroup>
 
-	<ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\Utilities\Utilities.fsproj" />
   </ItemGroup>
 

@@ -227,6 +227,19 @@ module Matrix =
             maxIterations = None
         }
 
+    let rec solveAll start goal matrix moves =
+        if start = goal then [moves]
+        else
+        [
+            let neighbors = 
+                neighborsWithValues matrix start
+                |> Seq.filter (fun kvp -> '#' <> kvp.Value)
+                |> Seq.filter (fun kvp -> not <| List.contains kvp.Key moves)
+                |> Seq.map (fun kvp -> kvp.Key)
+            for n in neighbors do
+                yield! solveAll n goal matrix (n::moves)
+        ]
+
     //Printing
 
     let defaultColormap char =

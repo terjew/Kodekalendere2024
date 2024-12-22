@@ -36,7 +36,7 @@ module MathEvaluator =
                  (xnum,ynum) = (true,true) || (xnum,ypt) = (true,true) || (xpt,ynum) = (true,true)
         match strfrom,strto with
         | hf::tf,[] -> exprlst tf [hf]
-        | hf::tf,(ht:string)::tt when gluechars (ht.[ht.Length-1].ToString(),hf) -> exprlst tf ([ht^hf]@tt)
+        | hf::tf,(ht:string)::tt when gluechars (ht.[ht.Length-1].ToString(),hf) -> exprlst tf ([ht + hf]@tt)
         | hf::tf,ht::tt when prefixoperator (ht,hf) -> exprlst (["0"]@strfrom) (strto)
         | hf::tf,strto -> exprlst tf ([hf]@strto)
         | _ -> strto |> List.rev
@@ -47,7 +47,7 @@ module MathEvaluator =
             match () with
             | _ when unaryop.ContainsKey elst.[ind] -> "unary"
             | _ when binaryop.ContainsKey elst.[ind] -> "binary"
-            | _ -> failwith ("Expecting operator, but given '"^elst.[ind]^"'") 
+            | _ -> failwith ("Expecting operator, but given '" + elst.[ind] + "'") 
         let bracketssum tsind = 
             let subl = (Array.ofList elst).[(min ind tsind)..(max ind tsind)]
             let charcount ch (arr:string[]) = arr |> Array.fold (fun a x -> if x = ch then a+1 else a) 0

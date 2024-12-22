@@ -14,7 +14,7 @@ type SearchStatus =
     | BoardExited of State
     | LoopFound
 
-let northChar = Direction.directionsToChar [Direction.North]
+let northChar = DirectionBitmask.directionsToBitmaskChar [Direction.North]
 
 let createState pos heading map =
     {
@@ -38,10 +38,10 @@ let move state newPos =
     }
 
 let writePosition state =
-    let cellHistory = Matrix.get state.Map state.Position |> Direction.directionsFromChar
+    let cellHistory = Matrix.get state.Map state.Position |> DirectionBitmask.directionsFromBitmaskChar
     match (cellHistory |> Seq.contains state.Heading) with
     | true -> LoopFound
-    | false ->  let newCellValue = Direction.directionsToChar (state.Heading :: cellHistory)
+    | false ->  let newCellValue = DirectionBitmask.directionsToBitmaskChar (state.Heading :: cellHistory)
                 let updatedMap = state.Map |> Matrix.withValueAt state.Position newCellValue
                 Running { state with 
                             Map = updatedMap
@@ -72,7 +72,7 @@ let placeObstacle state pos =
         Map = Matrix.withValueAt pos 'O' state.Map
     }
 
-printfn "%s" Direction.cardinalSymbolCombinations
+printfn "%s" DirectionBitmask.bitmaskSymbols
 
 let map = 
     File.ReadLines("input.txt")
@@ -83,7 +83,7 @@ let map =
 let start = findStart map
 let state = createState start Direction.North map
 let solved = state |> solve
-let visitedCells = solved.Map |> Matrix.findAllOf Direction.cardinalSymbolCombinations 
+let visitedCells = solved.Map |> Matrix.findAllOf DirectionBitmask.bitmaskSymbols 
 
 Matrix.print solved.Map
 

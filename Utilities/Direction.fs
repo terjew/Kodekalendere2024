@@ -6,8 +6,15 @@ module Direction =
     let ordinal = [|NorthEast ; SouthEast ; SouthWest ; NorthWest|]
     let cardinalAndOrdinal = [|North ; NorthEast ; East ; SouthEast ; South ; SouthWest ; West ; NorthWest|]
 
-    let cardinalSymbols = "╵╴╷╶"
-    let cardinalSymbolCombinations = "?╵╶└╷║┌╟╴┘═╧┐╢╤╬"
+    let cardinalSymbols = "^>v<" |> Seq.toArray
+
+    let directionToChar cardinalDirection = 
+        let index = cardinal |> Array.findIndex ((=) cardinalDirection)
+        cardinalSymbols[index]
+
+    let directionFromChar char =
+        let index = cardinalSymbols |> Array.findIndex ((=) char)
+        cardinal[index]
 
     let degrees direction =
         match direction with
@@ -26,36 +33,6 @@ module Direction =
         let h1 = degrees a
         let h2 = degrees b
         headingDiff h1 h2 |> abs |> (fun deg -> deg / 90)
-
-    let toInt cardinalDirection =
-        match cardinalDirection with
-        | North -> 1
-        | East -> 2
-        | South -> 4
-        | West -> 8
-        | _ -> failwith "unexpected direction"
-
-    let char int =
-        cardinalSymbolCombinations[int]
-
-    let intValueFromChar (char:char) =
-        match cardinalSymbolCombinations.IndexOf char with
-        | -1 -> 0
-        | a -> a
-
-    let directionsFromInt int =
-        [
-            if (int &&& 1) = 1 then yield North
-            if (int &&& 2) = 2 then yield East
-            if (int &&& 4) = 4 then yield South
-            if (int &&& 8) = 8 then yield West
-        ]
-
-    let directionsFromChar char =
-        char |> intValueFromChar |> directionsFromInt
-
-    let directionsToChar directions = 
-        directions |> Seq.sumBy toInt |> char
 
     let oposite direction = 
         match direction with
@@ -95,3 +72,36 @@ module Direction =
         let index = cardinalAndOrdinal |> Array.findIndex ((=) direction)
         let next = (index + steps) % cardinalAndOrdinal.Length
         cardinalAndOrdinal[next]
+
+module DirectionBitmask =
+    let bitmaskSymbols = "?╵╶└╷║┌╟╴┘═╧┐╢╤╬"
+
+    let toBitmask cardinalDirection =
+        match cardinalDirection with
+        | North -> 1
+        | East -> 2
+        | South -> 4
+        | West -> 8
+        | _ -> failwith "unexpected direction"
+
+    let charFromBitmask int =
+        bitmaskSymbols[int]
+
+    let bitmaskFromChar (char:char) =
+        match bitmaskSymbols.IndexOf char with
+        | -1 -> 0
+        | a -> a
+
+    let directionsFromBitmask int =
+        [
+            if (int &&& 1) = 1 then yield North
+            if (int &&& 2) = 2 then yield East
+            if (int &&& 4) = 4 then yield South
+            if (int &&& 8) = 8 then yield West
+        ]
+
+    let directionsFromBitmaskChar char =
+        char |> bitmaskFromChar |> directionsFromBitmask
+
+    let directionsToBitmaskChar directions = 
+        directions |> Seq.sumBy toBitmask |> charFromBitmask
