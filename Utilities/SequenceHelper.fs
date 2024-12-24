@@ -107,6 +107,9 @@ module SequenceHelper =
         | _, [] -> seq []
         | k, (x :: xs) -> Seq.append (Seq.map ((@) [x]) (getCombs (k - 1) xs)) (getCombs k xs)
 
+    let getCombs2Tuple lst =
+        getCombs 2 lst |> Seq.map (fun s -> (s[0],s[1]))
+
     /// Gets all combinations  (order irrelevant) *with* repetition of specified length from a list.
     let rec getCombsWithRep n lst = 
         match n, lst with
