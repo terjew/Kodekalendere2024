@@ -49,4 +49,37 @@ let dfs idof fanout node=
 //bfs id getChildren "vc" |> Seq.toList |> printfn "%A"
 //dfs id getChildren "vc" |> Seq.toList |> printfn "%A"
 
+//https://fssnip.net/jg/title/BronKerbosch-maximal-cliques-algorithm
+let rec bronKerbosch R P X graph =
+    let neighbors vertex =
+        graph
+        |> Map.find vertex
+        |> set
+    seq {
+        if (Set.isEmpty P) && (Set.isEmpty X) then
+          yield (Set.toSeq R)
+        let vPX =
+            Seq.unfold
+                (function
+                | (v::tailP as P, currX) ->
+                    let newX = Set.add v currX
+                    Some((v, set <| P, currX), (tailP, newX))
+                | ([], _) -> None)
+                (P |> Set.toList, X)
+        for (v, P, X) in vPX do
+            let n = neighbors v
+            yield! bronKerbosch (Set.add v R) (Set.intersect P n) (Set.intersect X n) graph
+    }
+
+let addConnection (a,b) map =
+    map 
+    |> Map.change a (fun seqMaybe -> 
+        match seqMaybe with
+        | Some aSeq -> Some (List.append [b] aSeq)
+        | None -> Some [b]
+    ) 
+
+let areConnected tree (a,b) =
+    Map.find a tree |> Seq.contains b
+
 
