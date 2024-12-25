@@ -14,3 +14,8 @@ module String =
         |> String.concat "" 
         |> printfn "%s" 
 
+    let parseBool string =
+        match string with
+        | ("True"|"true"|"1") -> true
+        | ("False"|"false"|"0") -> false
+        | any -> failwithf "Unknown bool format: %s" any

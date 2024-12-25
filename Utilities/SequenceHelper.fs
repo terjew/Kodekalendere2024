@@ -119,3 +119,9 @@ module SequenceHelper =
 
     let printMap map = 
         map |> Map.iter (fun key value -> printfn "%A : %A" key value)
+
+    let toTuple2 (list:List<'a>) =
+        list[0],list[1]
+
+    let toTuple3 (list:List<'a>) =
+        list[0],list[1],list[2]
