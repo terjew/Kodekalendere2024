@@ -39,10 +39,41 @@ let getQuadrant (x,y) =
     if sideX.IsNone || sideY.IsNone then None
     else Some (sideX.Value, sideY.Value)
     
-parse filename 
+let robots = parse filename
+
+robots
 |> Seq.map (calculatePosition 100)
 |> Seq.choose getQuadrant
 |> Seq.countBy id
 |> Seq.map snd
 |> Seq.fold (*) 1
-|> printfn "%A"
+|> printfn "Part 1: %A"
+
+let render matrix robot =
+    matrix |> Matrix.withValueAt robot '*'
+
+let findTree () =
+    seq {
+        let blank = Matrix.create sx sy '.'
+        for i in [0..1000000] do
+            if ((i % sx) = 11) || ((i % sy) = 89) then 
+                let map = 
+                    robots
+                    |> Seq.map (calculatePosition i)
+                    |> Seq.fold render blank
+                let horizontalRows = map |> Matrix.findRowsMatching @"\*\*\*\*\*\*\*\*"
+                if horizontalRows |> Seq.length > 0 then
+                    yield Some (i,map)            
+                else
+                    yield None
+    }
+
+findTree() 
+|> Seq.pick id 
+|> (fun (i,m) -> 
+    printfn "Part 2: %i" i
+    //m |> (Matrix.printColored Matrix.defaultColormap)
+    )
+|> ignore
+
+

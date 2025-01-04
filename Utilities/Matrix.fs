@@ -246,6 +246,7 @@ module Matrix =
         let color = 
             match char with 
             |'#' -> System.Drawing.Color.DarkRed
+            |'*' -> System.Drawing.Color.Green
             |'.' -> System.Drawing.ColorTranslator.FromHtml("#222222")
             | _  -> System.Drawing.Color.Cyan
         (string char).Pastel(color)
