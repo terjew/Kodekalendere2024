@@ -70,6 +70,7 @@ let priceSequenceAll (i,sequence) =
         printf "#" 
     caches |> Seq.sumBy (priceSequence sequence)
 
+#nowarn "57" //Experimental library feature Aray.Parallel
 let findBestSequence =
     enumerateSequences 
     |> Seq.toArray

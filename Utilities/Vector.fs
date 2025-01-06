@@ -15,6 +15,9 @@ module Vector =
     let subtract (x1,y1) (x2,y2) =
         (x1 - x2, y1 - y2)
 
+    let distance (x1,y1) (x2,y2) = 
+        ((x1 - x2) |> abs, (y1 - y2) |> abs)
+
     let mul (x,y) amount =
         (x * amount, y * amount)
 

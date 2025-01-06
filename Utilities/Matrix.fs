@@ -120,6 +120,9 @@ module Matrix =
         |> Set.ofSeq
 
     //Neighbor cells
+    let neighbor matrix direction pos =
+        Vector.neighbor pos direction |> get matrix
+
     let neighborCoordsDiagonal matrix (x,y)  = 
         let minx = if x = 0 then x else x - 1
         let miny = if y = 0 then y else y - 1
@@ -250,7 +253,7 @@ module Matrix =
             |'*' -> System.Drawing.Color.Green
             |'.' -> System.Drawing.ColorTranslator.FromHtml("#222222")
             | _  -> System.Drawing.Color.Cyan
-        (string char).Pastel(color)
+        (char,color)
 
     let print matrix =
         printfn "Matrix[%d,%d]" matrix.SizeX matrix.SizeY
