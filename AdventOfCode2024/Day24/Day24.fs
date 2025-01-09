@@ -1,5 +1,6 @@
 ﻿open System.IO
 open Utilities
+open System.Collections.Generic
 
 type Gate =
     | Input of int64
@@ -185,30 +186,6 @@ let findMismatchedOutputs schematic =
     |> Seq.filter (fun l -> l.Length = 2)
     |> Seq.map SequenceHelper.toTuple2
 
-let schematicWithAllZeroInput = 
-    schematic 
-    |> Map.map (fun name gate -> if name.StartsWith "x" || name.StartsWith "y" then (Input 0) else gate)
-
-let mismatched = findMismatchedOutputs schematicWithAllZeroInput
-
-let easySwaps = 
-    mismatched
-    |> Seq.choose (tryEasyFix schematicWithAllZeroInput)
-    |> Seq.toList
-
-let partiallyFixed = easySwaps |> Seq.fold swapGates schematicWithAllZeroInput
-
-let difficultSwaps = 
-    partiallyFixed
-    |> findMismatchedOutputs 
-    |> Seq.toList
-    |> List.choose (fun fault -> tryExtensiveFix partiallyFixed fault)
-
-Seq.append difficultSwaps easySwaps 
-|> Seq.collect SequenceHelper.fromTuple2
-|> Seq.sort
-|> String.concat ","
-|> printfn "Part 2: %s"
 
 //Stuff for visualizing the schematic:
 let shape gate = 
@@ -228,10 +205,12 @@ let inputs gate name =
     | OR (a,b) -> [a;b] |> List.map (connection name)
     | XOR (a,b) -> [a;b] |> List.map (connection name)
 
-let format name gate =
+let formatNode name gate =
+    sprintf "%s [shape=%s]" name (shape gate) //print node
+
+let formatConnection name gate =
     seq [
-        yield sprintf "%s [shape=%s]" name (shape gate)
-        yield! inputs gate name
+        yield! inputs gate name //print connections
     ]
 
 let printGraph schematic =
@@ -242,24 +221,102 @@ let printGraph schematic =
         ranksep=5
         "
 
-    schematic |> Map.map format |> Map.values |> Seq.collect id |> List.ofSeq |> String.concat "\n\t" |> printfn "%s"
+    schematic |> Map.map formatConnection |> Map.values |> Seq.collect id |> List.ofSeq |> String.concat "\n\t" |> printfn "%s"
 
-    //subgraph to order the x inputs and y inputs and separate them:
-    let xChain = getInputsOutputs schematic "x" |> String.concat " -> "
-    let yChain = getInputsOutputs schematic "y" |> String.concat " -> "
-    let zChain = getInputsOutputs schematic "z" |> String.concat " -> "
-    printfn @"{
-    rank = same;
-    rankdir = LR;
-    edge[ style=invis];
-    fooo [ style=invis width=5]
-    %s -> fooo -> %s;
-    }
+    let inputx = getInputsOutputs schematic "x"
+    let inputy = getInputsOutputs schematic "y"
+    let outputz = getInputsOutputs schematic "z"
 
+    let xyChain = inputx |> Seq.zip inputy |> Seq.collect SequenceHelper.fromTuple2 |> String.concat " -> "
+    let zChain = outputz |> String.concat " -> "
+
+    let inputOutputNodes = inputx |> Seq.append inputy |> Seq.append outputz |> Set
+    let internalnodes = inputOutputNodes |> Set.difference (schematic |> Map.keys |> Set)
+
+    let isInternal name _ = 
+        internalnodes |> Set.contains name
+
+    let isCategory i _ gate = 
+        let cat = 
+            match gate with
+            | Input _-> 0
+            | AND (a,b) -> if a.StartsWith "x" || b.StartsWith "x" then 1 else 2
+            | XOR _-> 1
+            | OR _ -> 3
+        cat = i
+
+    let formatNodes nodes =
+        nodes
+        |> Map.map formatNode
+        |> Map.toSeq
+        |> Seq.map snd
+        |> String.concat "; "
+
+    for category in [1..3] do
+        schematic 
+        |> Map.filter isInternal
+        |> Map.filter (isCategory category)
+        |> formatNodes
+        |> printfn @"
+            {
+            rank = same;
+            edge[ style=invis];
+            %s;
+            }" 
+
+    let xNodes = schematic |> Map.filter (fun name _ -> inputx |> Seq.contains name) |> formatNodes
+    let yNodes = schematic |> Map.filter (fun name _ -> inputy |> Seq.contains name) |> formatNodes
+    let zNodes = schematic |> Map.filter (fun name _ -> outputz |> Seq.contains name) |> formatNodes
+    printfn @"
     {
-    rank = same;
+    rank = min;
     rankdir = LR;
     edge[ style=invis];
     %s;
+    %s;
+    %s;
+    }" xNodes yNodes xyChain
+
+    printfn @"
+    {
+    rank = max;
+    rankdir = LR;
+    edge[ style=invis];
+    %s;
+    %s;
     }
-    }" xChain yChain zChain
+    }" zNodes zChain
+
+let findSwappedGates (schematic:Map<string,Gate>) =
+    let schematicWithAllZeroInput = 
+        schematic 
+        |> Map.map (fun name gate -> if name.StartsWith "x" || name.StartsWith "y" then (Input 0) else gate)
+
+    let mismatched = findMismatchedOutputs schematicWithAllZeroInput
+
+    let easySwaps = 
+        mismatched
+        |> Seq.choose (tryEasyFix schematicWithAllZeroInput)
+        |> Seq.toList
+
+    let partiallyFixed = easySwaps |> Seq.fold swapGates schematicWithAllZeroInput
+
+    let difficultSwaps = 
+        partiallyFixed
+        |> findMismatchedOutputs 
+        |> Seq.toList
+        |> List.choose (fun fault -> tryExtensiveFix partiallyFixed fault)
+
+    Seq.append difficultSwaps easySwaps 
+
+schematic |> printGraph
+
+let swapped = findSwappedGates schematic
+swapped |> Seq.fold swapGates schematic |> printGraph
+
+swapped
+|> Seq.collect SequenceHelper.fromTuple2
+|> Seq.sort
+|> String.concat ","
+|> printfn "Part 2: %s"
+
