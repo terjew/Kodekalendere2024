@@ -70,7 +70,7 @@ module Direction =
 
     let next direction steps = 
         let index = cardinalAndOrdinal |> Array.findIndex ((=) direction)
-        let next = (index + steps) % cardinalAndOrdinal.Length
+        let next = (index + steps + cardinalAndOrdinal.Length) % cardinalAndOrdinal.Length
         cardinalAndOrdinal[next]
 
 module DirectionBitmask =

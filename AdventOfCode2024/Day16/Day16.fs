@@ -9,11 +9,14 @@ type World =
         goal : int * int
     }
 
-type Player = 
+type Move =
+    | Forward
+    | Rotate of bool
+
+type PlayerState = 
     {
         pos : int * int
         heading : Direction
-        trail : (int * int) list
     }
 
 let getWorld filename = 
@@ -24,95 +27,73 @@ let getWorld filename =
         goal = map |> Matrix.find 'E'
     }
 
-let initializePlayer world =
-    {
-        pos = world.start
-        heading = Direction.East
-        trail = []
+let solveAStar world =
+    let start = { pos = world.start; heading = Direction.East}
+    let goal = { pos = world.goal; heading = Direction.North}
+    let isPassable pos =
+        (pos |> (Matrix.get world.map)) <> '#'
+
+    let apply move state =
+        match move with
+        | Forward -> 
+            let forwardPos = Vector.neighbor state.pos state.heading
+            if goal.pos = forwardPos then 
+                goal
+            else 
+                {state with pos = Vector.neighbor state.pos state.heading}
+        | Rotate cw -> {state with heading = (Direction.next state.heading (match cw with |true -> 2 | false -> -2))}
+
+    let neighbors (state:PlayerState) = 
+        seq [
+            let forward = state |> apply Forward
+            if isPassable forward.pos then yield forward
+            yield state |> apply (Rotate false)
+            yield state |> apply (Rotate true)
+        ]
+
+    let fCost state next = 
+        //next is always the goal state
+        //We ignore the heading, but instead use a heuristic that determines how many minimum heading changes are needed to get there
+        1.0
+
+    //cost of actually moving from state to next (must be a neighbor)
+    let gCost state next = 
+        match next with 
+        | goalState when goalState = goal -> 
+            1.0 //the last step into goal always costs 1.0 if it is really a neighbor (is in front)
+        | _ ->
+            match state.heading = next.heading with
+            | true -> 
+                1.0
+            | false -> 
+                1000.0
+
+    AStar.search start goal {
+        neighbours = neighbors
+        fCost = fCost
+        gCost = gCost
+        maxIterations = None
     }
 
-let move player pos =
-    { player with
-        pos = pos
-        trail = player.trail @ [pos]
-    }
-
-let rec traverse world player =
-    if world.goal = player.pos then seq { player.trail }
-    else
-        player.pos 
-        |> Matrix.neighborsWithValues world.map
-        |> Seq.filter (fun kvp -> kvp.Value <> '#')
-        |> Seq.map (fun kvp -> kvp.Key)
-        |> Seq.except player.trail
-        |> Seq.map (move player)
-        |> Seq.collect (traverse world)
-
-
-
-let rec scorePath pos heading path =
+let rec scorePath state path =
     match path with
     | [] -> 0
     | next :: tail -> 
-        let offset = Vector.subtract next pos
-        let direction = Direction.direction offset
-        let rotationCount = Direction.countRotationsBetween heading direction
-        let rotationScore = match direction with 
-                            | h when h = heading -> 0
-                            | _ -> 1000
-        rotationScore + 1 + scorePath next direction tail
-
-let world = getWorld "sample.txt"
-let player = initializePlayer world
-
-let paths = player |> traverse world
-paths |> Seq.map (scorePath world.start Direction.East) |> Seq.min |> printfn "Part 1: %A"
-
-//[<CustomComparison; CustomEquality>]
-//type PlayerState = 
-//    {
-//        pos : int * int
-//        heading : Direction option
-//    }
-//    override this.GetHashCode() =
-//        hash (this.pos)
-
-//    override this.Equals(other) =
-//        match other with
-//        | :? PlayerState as otherPlayer -> (this.pos = otherPlayer.pos) && (this.heading = None || otherPlayer.heading = None || this.heading = otherPlayer.heading)
-//        | _ -> false
-
-//    interface IComparable with
-//        member this.CompareTo other =
-//            match other with
-//            | :? PlayerState as otherPlayer -> (this :> IComparable<_>).CompareTo otherPlayer
-//            | _ -> -1
-
-//    interface IComparable<PlayerState> with
-//        member this.CompareTo other = Vector.manhattanDistance this.pos other.pos
-
-//let solveAStar world =
-//    let neighbors player = 
-//        Matrix.neighborCoordsWithDirection world.map player.pos
-//        |> Seq.filter (fun kvp -> '#' <> Matrix.get world.map kvp.Value)
-//        |> Seq.map (fun kvp -> {heading = Some kvp.Key; pos = kvp.Value})
-
-//    let fCost state next = 
-//        (float (Vector.manhattanDistance next.pos state.pos + 1000)) //fixme: 0 if next is straight ahead, 2000 if facing away
-
-//    //cost of actually moving from state to next (must be a neighbor)
-//    let gCost state next = 
-//        let offset = Vector.subtract next.pos state.pos
-//        let direction = Direction.direction offset
-//        let rotationCount = Direction.countRotationsBetween state.heading.Value direction
-//        (float (rotationCount * 1000 + 1))
-
-//    AStar.search { pos = world.start; heading = Some Direction.East} {pos = world.goal; heading = None} {
-//        neighbours = neighbors
-//        fCost = fCost
-//        gCost = gCost
-//        maxIterations = None
-//    }
+        if tail.Length = 0 then 1 //last move is always 1 (move forward into goal)
+        else 
+            let cost =             
+                match state.heading = next.heading with
+                | true -> 1
+                | false -> 1000
+            cost + scorePath next tail
     
-//let state = {pos = world.start; heading = Some East}
-//solveAStar world |> printfn "%A"
+let render map state =
+    map |> Matrix.withValueAt state.pos 'o'
+
+let world = getWorld "input.txt"
+
+let solution = solveAStar world |> Option.get |> Seq.rev |> List.ofSeq
+let sub = solution.GetSlice (Some 1, Some (solution.Length - 2))
+sub |> List.fold render world.map |> Matrix.printColored Matrix.defaultColormap |> ignore
+
+solution.GetSlice (Some 1, None) |> scorePath {pos=world.start; heading=Direction.East} |> printfn "%A"
